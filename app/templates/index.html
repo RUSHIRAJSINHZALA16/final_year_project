@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+{% if featured %}
+<div class="relative h-[75vh] w-full bg-cover bg-center" style="background-image: url('https://image.tmdb.org/t/p/original{{ featured.poster_path }}');">
+    <div class="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-black/40 p-20 flex flex-col justify-end">
+        <h1 class="text-7xl font-bold mb-4">{{ featured.title }}</h1>
+        <p class="w-1/3 text-lg text-gray-200 mb-6">{{ featured.overview[:250] }}...</p>
+        <div class="flex gap-4">
+            <button class="bg-white text-black px-10 py-3 rounded font-bold hover:bg-gray-200"><i class="fa fa-play mr-2"></i> Play</button>
+            <button class="bg-gray-500/50 text-white px-10 py-3 rounded font-bold hover:bg-gray-400">More Info</button>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="relative h-[75vh] w-full bg-cover bg-center flex items-center justify-center bg-[#141414]">
+    <div class="text-center">
+        <h1 class="text-4xl font-bold mb-4 text-white">Welcome to Streamify</h1>
+        <p class="text-lg text-gray-400">No movies found in the database. Please run the data loading script.</p>
+    </div>
+</div>
+{% endif %}
+
+{% for genre, movies in genre_data.items() %}
+<div class="px-12 py-8">
+    <h2 class="text-2xl font-semibold mb-4 text-gray-400">{{ genre }}</h2>
+    <div class="flex gap-4 overflow-x-auto no-scrollbar">
+        {% for movie in movies %}
+        <div class="min-w-[250px] transition-transform hover:scale-110 duration-300 relative group cursor-pointer">
+            <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" class="rounded shadow-xl" onclick="window.location.href=/movie/{{movie.id}}">
+            <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-center text-center">
+                <p class="font-bold text-sm mb-2">{{ movie.title }}</p>
+                <form action="/rate/{{ movie.id }}" method="POST" class="flex flex-col gap-2 items-center">
+                    <input type="number" name="score" min="1" max="10" placeholder="Rate 1-10" class="w-20 bg-gray-700 text-xs p-1 rounded">
+                    <button class="bg-red-600 text-[10px] px-3 py-1 rounded">Live Rate</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
