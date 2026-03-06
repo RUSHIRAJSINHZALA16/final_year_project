@@ -27,3 +27,15 @@ class Rating(db.Model):
     score = db.Column(db.Integer, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     movie = db.relationship('Movie', backref='user_ratings')
+
+class WatchlistItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    item_id = db.Column(db.Integer, nullable=False) # TMDB ID
+    media_type = db.Column(db.String(10), nullable=False) # 'movie' or 'tv'
+    title = db.Column(db.String(255), nullable=False)
+    poster_path = db.Column(db.String(255))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship with User
+    user = db.relationship('User', backref=db.backref('watchlist', lazy=True))

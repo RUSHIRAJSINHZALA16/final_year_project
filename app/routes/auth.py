@@ -31,6 +31,11 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+
+        if password != confirm_password:
+            flash('Passwords do not match.', 'error')
+            return redirect(url_for('auth.register'))
 
         user = User.query.filter_by(username=username).first()
 
@@ -42,6 +47,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
+        flash('Account created successfully! Please log in.', 'success')
         return redirect(url_for('auth.login'))
 
     # We will just reuse the login template for registration for now, or just return basic HTML if missing

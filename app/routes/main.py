@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 from themoviedb import TMDb, Genre, PartialMovie
 
-from ..models import Movie, Rating, db
+from ..models import Movie, Rating, WatchlistItem, db
 
 # If you have the recommendation logic ready, import it here:
 # from ..recommendation import get_ai_recommendations
@@ -61,6 +61,42 @@ def rate(movie_id):
     db.session.commit()
     return redirect(url_for('main.index'))
 
+@main.route('/toggle-watchlist/<media_type>/<int:item_id>', methods=['POST'])
+@login_required
+def toggle_watchlist(media_type, item_id):
+    if media_type not in ['movie', 'tv']:
+        return redirect(request.referrer or url_for('main.index'))
+        
+    title = request.form.get('title')
+    poster_path = request.form.get('poster_path')
+    
+    # Check if item is already in watchlist
+    existing_item = WatchlistItem.query.filter_by(
+        user_id=current_user.id, 
+        item_id=item_id, 
+        media_type=media_type
+    ).first()
+    
+    if existing_item:
+        db.session.delete(existing_item)
+    else:
+        new_item = WatchlistItem(
+            user_id=current_user.id,
+            item_id=item_id,
+            media_type=media_type,
+            title=title,
+            poster_path=poster_path
+        )
+        db.session.add(new_item)
+        
+    db.session.commit()
+    return redirect(request.referrer or url_for('main.index'))
+
+@main.route('/my-list')
+@login_required
+def my_list():
+    items = WatchlistItem.query.filter_by(user_id=current_user.id).order_by(WatchlistItem.timestamp.desc()).all()
+    return render_template('my_list.html', items=items)
 
 @main.route('/search')
 @login_required
@@ -108,6 +144,13 @@ def movie_detail_page(movie_id:int):
     movie_videos = tmdb_movie.videos().results
     movie_credits = tmdb_movie.credits()
     movie_images = tmdb_movie.images()
+    
+    # Check if in watchlist
+    in_watchlist = WatchlistItem.query.filter_by(
+        user_id=current_user.id, 
+        item_id=movie_id, 
+        media_type='movie'
+    ).first() is not None
 
     return render_template('movie_detail.html',
                            movie_detail=movie_detail,
@@ -115,7 +158,8 @@ def movie_detail_page(movie_id:int):
                            movie_recommendations=movie_recommendations,
                            movie_similar=movie_similar,
                            movie_credits=movie_credits,
-                           movie_images=movie_images
+                           movie_images=movie_images,
+                           in_watchlist=in_watchlist
                            )
 
 
@@ -136,6 +180,13 @@ def tv_show_detail_page(tv_show_id:int):
     tv_show_videos = tmdb_tv_show.videos().results
     tv_show_credits = tmdb_tv_show.credits()
     tv_show_images = tmdb_tv_show.images()
+    
+    # Check if in watchlist
+    in_watchlist = WatchlistItem.query.filter_by(
+        user_id=current_user.id, 
+        item_id=tv_show_id, 
+        media_type='tv'
+    ).first() is not None
 
     return render_template('tv_show_detail.html',
                            tv_show_detail=tv_show_detail,
@@ -143,5 +194,6 @@ def tv_show_detail_page(tv_show_id:int):
                            tv_show_recommendations=tv_show_recommendations,
                            tv_show_similar=tv_show_similar,
                            tv_show_credits=tv_show_credits,
-                           tv_show_images=tv_show_images
+                           tv_show_images=tv_show_images,
+                           in_watchlist=in_watchlist
                            )

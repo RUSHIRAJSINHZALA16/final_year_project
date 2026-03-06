@@ -3,7 +3,7 @@
 {% block content %}
 <div class="min-h-screen flex items-center justify-center bg-cover bg-center" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), url('https://assets.nflxext.com/ffe/siteui/vlv3/a73c4363-1dcd-4719-b3b1-3725418fd91d/fe1147dd-78be-44aa-a0e5-2d2994305a13/IN-en-20231016-popsignuptwoweeks-perspective_alpha_website_large.jpg');">
     <div class="bg-black/75 p-16 rounded-md w-full max-w-md z-10 mt-16">
-        <h2 class="text-3xl font-bold mb-8 text-white">Sign In</h2>
+        <h2 class="text-3xl font-bold mb-8 text-white">{% if is_register %}Sign Up{% else %}Sign In{% endif %}</h2>
         
         <form action="{{ url_for('auth.register') if is_register else url_for('auth.login') }}" method="POST" class="flex flex-col gap-4">
             <div>
@@ -11,13 +11,27 @@
                     class="w-full bg-[#333] text-white px-4 py-3.5 rounded focus:outline-none focus:ring-2 focus:ring-red-600 transition">
             </div>
             
-            <div>
-                <input type="password" name="password" placeholder="Password" required
-                    class="w-full bg-[#333] text-white px-4 py-3.5 rounded focus:outline-none focus:ring-2 focus:ring-red-600 transition">
+            <div class="relative">
+                <input type="password" name="password" id="password" placeholder="Password" required
+                    class="w-full bg-[#333] text-white px-4 py-3.5 pr-10 rounded focus:outline-none focus:ring-2 focus:ring-red-600 transition">
+                <button type="button" onclick="togglePasswordVisibility('password', 'togglePasswordIcon')" class="absolute right-3 top-4 text-gray-400 hover:text-white transition">
+                    <i class="fa fa-eye" id="togglePasswordIcon"></i>
+                </button>
             </div>
             
+            {% if is_register %}
+            <div class="relative">
+                <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password" required
+                    class="w-full bg-[#333] text-white px-4 py-3.5 pr-10 rounded focus:outline-none focus:ring-2 focus:ring-red-600 transition">
+                <button type="button" onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmIcon')" class="absolute right-3 top-4 text-gray-400 hover:text-white transition">
+                    <i class="fa fa-eye" id="toggleConfirmIcon"></i>
+                </button>
+            </div>
+            <p id="password_match_message" class="text-sm text-red-500 hidden">Passwords do not match</p>
+            {% endif %}
+            
             <button type="submit" class="bg-red-600 text-white font-bold py-3.5 rounded mt-6 hover:bg-red-700 transition">
-                Sign In
+                {% if is_register %}Sign Up{% else %}Sign In{% endif %}
             </button>
             <div class="flex justify-between text-gray-400 text-xs mt-2">
                 <label class="flex items-center gap-1 cursor-pointer">
@@ -29,8 +43,55 @@
         </form>
         
         <div class="mt-16 text-gray-500">
+            {% if is_register %}
+            <p>Already have an account? <a href="{{ url_for('auth.login') }}" class="text-white hover:underline">Sign In</a>.</p>
+            {% else %}
             <p>New to Streamify? <a href="{{ url_for('auth.register') }}" class="text-white hover:underline">Sign up now</a>.</p>
+            {% endif %}
         </div>
     </div>
+    </div>
 </div>
+
+<script>
+    function togglePasswordVisibility(inputId, iconId) {
+        const passwordInput = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    const form = document.querySelector('form');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const matchMessage = document.getElementById('password_match_message');
+
+    if (confirmPasswordInput) {
+        form.addEventListener('submit', function(event) {
+            if (passwordInput.value !== confirmPasswordInput.value) {
+                event.preventDefault();
+                matchMessage.classList.remove('hidden');
+            } else {
+                matchMessage.classList.add('hidden');
+            }
+        });
+
+        // Optional: Real-time validation
+        confirmPasswordInput.addEventListener('input', function() {
+            if (passwordInput.value !== confirmPasswordInput.value && confirmPasswordInput.value !== '') {
+                matchMessage.classList.remove('hidden');
+            } else {
+                matchMessage.classList.add('hidden');
+            }
+        });
+    }
+</script>
 {% endblock %}
