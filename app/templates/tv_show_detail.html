@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div>
+    <img src="https://image.tmdb.org/t/p/w500{{ tv_show_detail.poster_path }}" alt="">
+</div>
+
+<div>
+    {% for vid in tv_show_videos %}
+        <div>
+            <embed src="https://www.themoviedb.org/video/play?key={{vid.key}}">
+        </div>
+    {% endfor %}
+</div>
+
+
+{% endblock %}
