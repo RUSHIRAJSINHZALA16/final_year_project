@@ -26,13 +26,13 @@
     <div class="flex gap-4 overflow-x-auto no-scrollbar">
         {% for movie in movies %}
         <div class="min-w-[250px] transition-transform hover:scale-110 duration-300 relative group cursor-pointer">
-            <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" class="rounded shadow-xl" onclick="window.location.href=/movie/{{movie.id}}">
-            <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-center text-center">
+            <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" class="rounded shadow-xl">
+            <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-center text-center" onclick="window.location.href='/movie/{{movie.id}}'">
                 <p class="font-bold text-sm mb-2">{{ movie.title }}</p>
-                <form action="/rate/{{ movie.id }}" method="POST" class="flex flex-col gap-2 items-center">
-                    <input type="number" name="score" min="1" max="10" placeholder="Rate 1-10" class="w-20 bg-gray-700 text-xs p-1 rounded">
-                    <button class="bg-red-600 text-[10px] px-3 py-1 rounded">Live Rate</button>
-                </form>
+<!--                <form action="/rate/{{ movie.id }}" method="POST" class="flex flex-col gap-2 items-center">-->
+<!--                    <input type="number" name="score" min="1" max="10" placeholder="Rate 1-10" class="w-20 bg-gray-700 text-xs p-1 rounded">-->
+<!--                    <button class="bg-red-600 text-[10px] px-3 py-1 rounded">Live Rate</button>-->
+<!--                </form>-->
             </div>
         </div>
         {% endfor %}
