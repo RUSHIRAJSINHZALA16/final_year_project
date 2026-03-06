@@ -7,7 +7,7 @@ from themoviedb import TMDb, Genre, PartialMovie
 from ..models import Movie, Rating, WatchlistItem, db
 
 # If you have the recommendation logic ready, import it here:
-# from ..recommendation import get_ai_recommendations
+# from recommendation import get_ai_recommendations
 
 main = Blueprint('main', __name__)
 
@@ -16,21 +16,12 @@ tmdb = TMDb()
 @main.route('/')
 @login_required
 def index():
-    # 1. Fetch Movies by Genre for the Netflix Rows
-    # Make sure these genres match what you loaded in scripts/load_tmdb.py
-    # genres = ["Action", "Comedy", "Drama", "Sci-Fi"]
-
-    # We create a dictionary where each key is a genre and the value is a list of movies
-    # genre_data = {
-    #     g: Movie.query.filter(Movie.genre.ilike(f'%{g}%')).limit(10).all()
-    #     for g in genres
-    # }
-    genre_data:dict[str,  list[PartialMovie] | None] = {}
-
-    genre_data['Action'] = tmdb.discover().movie(page=1, with_genres='28').results
-    genre_data['Comedy'] = tmdb.discover().movie(page=1, with_genres='35').results
-    genre_data['Drama'] = tmdb.discover().movie(page=1, with_genres='18').results
-    genre_data['Sci-Fi'] = tmdb.discover().movie(page=1, with_genres='878').results
+    genre_data:dict[str,  list[PartialMovie] | None] = {
+        'Action': tmdb.discover().movie(page=1, with_genres='28').results,
+        'Comedy': tmdb.discover().movie(page=1, with_genres='35').results,
+        'Drama': tmdb.discover().movie(page=1, with_genres='18').results,
+        'Sci-Fi': tmdb.discover().movie(page=1, with_genres='878').results
+    }
 
     # 2. Pick a "Featured" movie for the Hero/Top Banner
     # featured = Movie.query.order_by(Movie.tmdb_rating.desc()).first()
@@ -134,16 +125,10 @@ def movie_detail_page(movie_id:int):
         return redirect(url_for('main.index'))
 
     tmdb_movie = tmdb.movie(movie_id)
-    movie_detail = tmdb_movie.details()
+    movie_detail = tmdb_movie.details(append_to_response="recommendations,similar,videos,credits,images")
 
     if movie_detail is None:
         return redirect(url_for('main.index'))
-
-    movie_recommendations = tmdb_movie.recommendations().results
-    movie_similar = tmdb_movie.similar().results
-    movie_videos = tmdb_movie.videos().results
-    movie_credits = tmdb_movie.credits()
-    movie_images = tmdb_movie.images()
     
     # Check if in watchlist
     in_watchlist = WatchlistItem.query.filter_by(
@@ -154,11 +139,6 @@ def movie_detail_page(movie_id:int):
 
     return render_template('movie_detail.html',
                            movie_detail=movie_detail,
-                           movie_videos=movie_videos,
-                           movie_recommendations=movie_recommendations,
-                           movie_similar=movie_similar,
-                           movie_credits=movie_credits,
-                           movie_images=movie_images,
                            in_watchlist=in_watchlist
                            )
 
@@ -170,16 +150,10 @@ def tv_show_detail_page(tv_show_id:int):
         return redirect(url_for('main.index'))
 
     tmdb_tv_show = tmdb.tv(tv_show_id)
-    tv_show_detail = tmdb_tv_show.details()
+    tv_show_detail = tmdb_tv_show.details(append_to_response="recommendations,similar,videos,credits,images")
 
     if tv_show_detail is None:
         return redirect(url_for('main.index'))
-
-    tv_show_recommendations = tmdb_tv_show.recommendations().results
-    tv_show_similar = tmdb_tv_show.similar().results
-    tv_show_videos = tmdb_tv_show.videos().results
-    tv_show_credits = tmdb_tv_show.credits()
-    tv_show_images = tmdb_tv_show.images()
     
     # Check if in watchlist
     in_watchlist = WatchlistItem.query.filter_by(
@@ -190,10 +164,5 @@ def tv_show_detail_page(tv_show_id:int):
 
     return render_template('tv_show_detail.html',
                            tv_show_detail=tv_show_detail,
-                           tv_show_videos=tv_show_videos,
-                           tv_show_recommendations=tv_show_recommendations,
-                           tv_show_similar=tv_show_similar,
-                           tv_show_credits=tv_show_credits,
-                           tv_show_images=tv_show_images,
                            in_watchlist=in_watchlist
                            )

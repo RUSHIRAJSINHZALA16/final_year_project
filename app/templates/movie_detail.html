@@ -113,15 +113,15 @@
 <div class="bg-[#141414] pb-20">
     <div class="container mx-auto px-6 md:px-12">
         {% set trailer = namespace(found=false, vid=None) %}
-        {% for vid in movie_videos %}
+        {% for vid in movie_detail.videos %}
             {% if vid.site == 'YouTube' and vid.type == 'Trailer' and not trailer.found %}
                 {% set trailer.found = true %}
                 {% set trailer.vid = vid %}
             {% endif %}
         {% endfor %}
         
-        {% if not trailer.found and movie_videos %}
-            {% set trailer.vid = movie_videos[0] %}
+        {% if not trailer.found and movie_detail.videos %}
+            {% set trailer.vid = movie_detail.videos[0] %}
         {% endif %}
 
         {% if trailer.vid %}
@@ -135,11 +135,11 @@
         {% endif %}
 
         <!-- Top Cast Section (Casting Proper List) -->
-        {% if movie_credits and movie_credits.cast %}
+        {% if movie_detail.credits and movie_detail.credits.cast %}
         <div class="mb-16">
             <h2 class="text-2xl font-bold mb-6 text-white border-l-4 border-red-600 pl-3">Top Cast</h2>
             <div class="flex gap-6 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 scroll-smooth">
-                {% for actor in movie_credits.cast[:15] %}
+                {% for actor in movie_detail.credits.cast[:15] %}
                 <div class="min-w-[140px] w-[140px] flex-shrink-0 bg-gray-900 rounded-lg overflow-hidden shadow-lg border border-gray-800 hover:border-gray-600 transition duration-300 group">
                     <div class="h-[210px] bg-gray-800 overflow-hidden">
                         {% if actor.profile_path %}
@@ -161,11 +161,11 @@
         {% endif %}
 
         <!-- Recommendations Section -->
-        {% if movie_recommendations %}
+        {% if movie_detail.recommendations %}
         <div class="mb-16">
             <h2 class="text-2xl font-bold mb-6 text-white border-l-4 border-red-600 pl-3">Recommended Movies</h2>
             <div class="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 scroll-smooth">
-                {% for movie in movie_recommendations %}
+                {% for movie in movie_detail.recommendations %}
                 <div class="min-w-[200px] w-[200px] md:min-w-[250px] md:w-[250px] transition-transform hover:scale-105 duration-300 relative group cursor-pointer rounded-lg overflow-hidden shadow-lg" onclick="window.location.href='/movie/{{movie.id}}'">
                     {% if movie.poster_path %}
                     <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}" class="w-full h-full object-cover">
@@ -185,11 +185,11 @@
         {% endif %}
 
         <!-- Similar Movies Section -->
-        {% if movie_similar %}
+        {% if movie_detail.similar %}
         <div class="mb-8">
             <h2 class="text-2xl font-bold mb-6 text-white border-l-4 border-red-600 pl-3">Similar Movies</h2>
             <div class="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 scroll-smooth">
-                {% for movie in movie_similar %}
+                {% for movie in movie_detail.similar %}
                 <div class="min-w-[200px] w-[200px] md:min-w-[250px] md:w-[250px] transition-transform hover:scale-105 duration-300 relative group cursor-pointer rounded-lg overflow-hidden shadow-lg" onclick="window.location.href='/movie/{{movie.id}}'">
                     {% if movie.poster_path %}
                     <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}" class="w-full h-full object-cover">

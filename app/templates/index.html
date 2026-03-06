@@ -29,24 +29,24 @@
             <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" class="rounded shadow-xl">
             <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-center text-center" onclick="window.location.href='/movie/{{movie.id}}'">
                 <p class="font-bold text-sm mb-2">{{ movie.title }}</p>
-                <form action="/rate/{{ movie.id }}" method="POST" class="flex flex-col items-center mt-2 star-rating-form" onclick="event.stopPropagation()">
-                    <div class="flex flex-row-reverse justify-center items-center gap-1 group star-rating">
-                        <input type="radio" name="score" value="10" id="star5-idx-{{movie.id}}" class="peer hidden" onchange="this.form.submit()">
-                        <label for="star5-idx-{{movie.id}}" class="text-gray-500 cursor-pointer transition-colors"><i class="fa fa-star text-sm"></i></label>
-                        
-                        <input type="radio" name="score" value="8" id="star4-idx-{{movie.id}}" class="peer hidden" onchange="this.form.submit()">
-                        <label for="star4-idx-{{movie.id}}" class="text-gray-500 cursor-pointer transition-colors"><i class="fa fa-star text-sm"></i></label>
-                        
-                        <input type="radio" name="score" value="6" id="star3-idx-{{movie.id}}" class="peer hidden" onchange="this.form.submit()">
-                        <label for="star3-idx-{{movie.id}}" class="text-gray-500 cursor-pointer transition-colors"><i class="fa fa-star text-sm"></i></label>
-                        
-                        <input type="radio" name="score" value="4" id="star2-idx-{{movie.id}}" class="peer hidden" onchange="this.form.submit()">
-                        <label for="star2-idx-{{movie.id}}" class="text-gray-500 cursor-pointer transition-colors"><i class="fa fa-star text-sm"></i></label>
-                        
-                        <input type="radio" name="score" value="2" id="star1-idx-{{movie.id}}" class="peer hidden" onchange="this.form.submit()">
-                        <label for="star1-idx-{{movie.id}}" class="text-gray-500 cursor-pointer transition-colors"><i class="fa fa-star text-sm"></i></label>
-                    </div>
-                </form>
+<!--                <form action="/rate/{{ movie.id }}" method="POST" class="flex flex-col items-center mt-2 star-rating-form" onclick="event.stopPropagation()">-->
+<!--                    <div class="flex flex-row-reverse justify-center items-center gap-1 group star-rating">-->
+<!--                        <input type="radio" name="score" value="10" id="star5-idx-{{movie.id}}" class="peer hidden" onchange="this.form.submit()">-->
+<!--                        <label for="star5-idx-{{movie.id}}" class="text-gray-500 cursor-pointer transition-colors"><i class="fa fa-star text-sm"></i></label>-->
+<!--                        -->
+<!--                        <input type="radio" name="score" value="8" id="star4-idx-{{movie.id}}" class="peer hidden" onchange="this.form.submit()">-->
+<!--                        <label for="star4-idx-{{movie.id}}" class="text-gray-500 cursor-pointer transition-colors"><i class="fa fa-star text-sm"></i></label>-->
+<!--                        -->
+<!--                        <input type="radio" name="score" value="6" id="star3-idx-{{movie.id}}" class="peer hidden" onchange="this.form.submit()">-->
+<!--                        <label for="star3-idx-{{movie.id}}" class="text-gray-500 cursor-pointer transition-colors"><i class="fa fa-star text-sm"></i></label>-->
+<!--                        -->
+<!--                        <input type="radio" name="score" value="4" id="star2-idx-{{movie.id}}" class="peer hidden" onchange="this.form.submit()">-->
+<!--                        <label for="star2-idx-{{movie.id}}" class="text-gray-500 cursor-pointer transition-colors"><i class="fa fa-star text-sm"></i></label>-->
+<!--                        -->
+<!--                        <input type="radio" name="score" value="2" id="star1-idx-{{movie.id}}" class="peer hidden" onchange="this.form.submit()">-->
+<!--                        <label for="star1-idx-{{movie.id}}" class="text-gray-500 cursor-pointer transition-colors"><i class="fa fa-star text-sm"></i></label>-->
+<!--                    </div>-->
+<!--                </form>-->
             </div>
         </div>
         {% endfor %}

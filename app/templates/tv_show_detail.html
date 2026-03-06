@@ -6,7 +6,7 @@
     <!-- Backdrop Image with Gradient Overlays -->
     <div class="absolute inset-0 w-full h-full">
         {% if tv_show_detail.backdrop_path %}
-            <img src="https://image.tmdb.org/t/p/original{{ tv_show_detail.backdrop_path }}" alt="{{ tv_show_detail.name }}" class="w-full h-full object-cover object-top opacity-50">
+            <img src="https://image.tmdb.org/t/p/original{{ tv_show_detail.backdrop_path }}" alt="{{ tv_show_detail.title }}" class="w-full h-full object-cover object-top opacity-50">
         {% else %}
             <div class="w-full h-full bg-gray-900"></div>
         {% endif %}
@@ -17,11 +17,11 @@
 
     <!-- Content Container -->
     <div class="relative z-10 container mx-auto px-6 md:px-12 pt-32 pb-16 flex flex-col md:flex-row gap-12 items-center md:items-start h-full">
-        
+
         <!-- Poster Thumbnail -->
         <div class="w-64 md:w-80 flex-shrink-0">
             {% if tv_show_detail.poster_path %}
-                <img src="https://image.tmdb.org/t/p/w500{{ tv_show_detail.poster_path }}" alt="{{ tv_show_detail.name }} Poster" class="rounded-xl shadow-2xl border border-gray-700 w-full hover:scale-105 transition duration-300">
+                <img src="https://image.tmdb.org/t/p/w500{{ tv_show_detail.poster_path }}" alt="{{ tv_show_detail.title }} Poster" class="rounded-xl shadow-2xl border border-gray-700 w-full hover:scale-105 transition duration-300">
             {% else %}
                 <div class="w-full aspect-[2/3] bg-gray-800 rounded-xl flex items-center justify-center text-gray-500 border border-gray-700">No Poster</div>
             {% endif %}
@@ -30,12 +30,12 @@
         <!-- Details -->
         <div class="flex-1 flex flex-col justify-center mt-4 md:mt-10">
             <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight mb-2 drop-shadow-md">
-                {{ tv_show_detail.name }}
-                {% if tv_show_detail.first_air_date %}
-                    <span class="text-3xl font-light text-gray-300">({{ tv_show_detail.first_air_date.year }})</span>
+                {{ tv_show_detail.title }}
+                {% if tv_show_detail.release_date %}
+                    <span class="text-3xl font-light text-gray-300">({{ tv_show_detail.release_date.year }})</span>
                 {% endif %}
             </h1>
-            
+
             {% if tv_show_detail.tagline %}
                 <p class="text-xl text-gray-400 italic mb-6">"{{ tv_show_detail.tagline }}"</p>
             {% else %}
@@ -49,9 +49,9 @@
                         <i class="fa fa-star"></i> {{ "{:.1f}".format(tv_show_detail.vote_average) }} Rating
                     </span>
                 {% endif %}
-                {% if tv_show_detail.number_of_seasons %}
+                {% if tv_show_detail.runtime %}
                     <span class="flex items-center gap-1">
-                        <i class="fa fa-tv"></i> {{ tv_show_detail.number_of_seasons }} Season{% if tv_show_detail.number_of_seasons > 1 %}s{% endif %}
+                        <i class="fa fa-clock"></i> {{ tv_show_detail.runtime // 60 }}h {{ tv_show_detail.runtime % 60 }}m
                     </span>
                 {% endif %}
                 {% if tv_show_detail.genres %}
@@ -71,8 +71,8 @@
 
             <!-- Actions -->
             <div class="flex items-center gap-4 mb-8">
-                <form action="{{ url_for('main.toggle_watchlist', media_type='tv', item_id=tv_show_detail.id) }}" method="POST">
-                    <input type="hidden" name="title" value="{{ tv_show_detail.name }}">
+                <form action="{{ url_for('main.toggle_watchlist', media_type='movie', item_id=tv_show_detail.id) }}" method="POST">
+                    <input type="hidden" name="title" value="{{ tv_show_detail.title }}">
                     <input type="hidden" name="poster_path" value="{{ tv_show_detail.poster_path or '' }}">
                     <button type="submit" class="flex items-center gap-2 px-6 py-2.5 rounded font-bold transition duration-300 {% if in_watchlist %}bg-gray-600/50 hover:bg-gray-500/50 text-white{% else %}bg-transparent border-2 border-white text-white hover:bg-white hover:text-black{% endif %}">
                         {% if in_watchlist %}
@@ -92,20 +92,20 @@
                     <span class="text-white font-medium">{{ tv_show_detail.status }}</span>
                 </div>
                 {% endif %}
-                {% if tv_show_detail.number_of_episodes %}
+                {% if tv_show_detail.budget and tv_show_detail.budget > 0 %}
                 <div>
-                    <span class="text-gray-500 block mb-1">Episodes</span>
-                    <span class="text-white font-medium">{{ tv_show_detail.number_of_episodes }}</span>
+                    <span class="text-gray-500 block mb-1">Budget</span>
+                    <span class="text-white font-medium">${{ "{:,}".format(tv_show_detail.budget) }}</span>
                 </div>
                 {% endif %}
-                {% if tv_show_detail.networks and tv_show_detail.networks|length > 0 %}
+                {% if tv_show_detail.revenue and tv_show_detail.revenue > 0 %}
                 <div>
-                    <span class="text-gray-500 block mb-1">Network</span>
-                    <span class="text-white font-medium">{{ tv_show_detail.networks[0].name }}</span>
+                    <span class="text-gray-500 block mb-1">Revenue</span>
+                    <span class="text-white font-medium">${{ "{:,}".format(tv_show_detail.revenue) }}</span>
                 </div>
                 {% endif %}
             </div>
-            
+
         </div>
     </div>
 </div>
@@ -113,15 +113,15 @@
 <div class="bg-[#141414] pb-20">
     <div class="container mx-auto px-6 md:px-12">
         {% set trailer = namespace(found=false, vid=None) %}
-        {% for vid in tv_show_videos %}
+        {% for vid in tv_show_detail.videos %}
             {% if vid.site == 'YouTube' and vid.type == 'Trailer' and not trailer.found %}
                 {% set trailer.found = true %}
                 {% set trailer.vid = vid %}
             {% endif %}
         {% endfor %}
-        
-        {% if not trailer.found and tv_show_videos %}
-            {% set trailer.vid = tv_show_videos[0] %}
+
+        {% if not trailer.found and tv_show_detail.videos %}
+            {% set trailer.vid = tv_show_detail.videos[0] %}
         {% endif %}
 
         {% if trailer.vid %}
@@ -135,11 +135,11 @@
         {% endif %}
 
         <!-- Top Cast Section (Casting Proper List) -->
-        {% if tv_show_credits and tv_show_credits.cast %}
+        {% if tv_show_detail.credits and tv_show_detail.credits.cast %}
         <div class="mb-16">
             <h2 class="text-2xl font-bold mb-6 text-white border-l-4 border-red-600 pl-3">Top Cast</h2>
             <div class="flex gap-6 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 scroll-smooth">
-                {% for actor in tv_show_credits.cast[:15] %}
+                {% for actor in tv_show_detail.credits.cast[:15] %}
                 <div class="min-w-[140px] w-[140px] flex-shrink-0 bg-gray-900 rounded-lg overflow-hidden shadow-lg border border-gray-800 hover:border-gray-600 transition duration-300 group">
                     <div class="h-[210px] bg-gray-800 overflow-hidden">
                         {% if actor.profile_path %}
@@ -161,21 +161,21 @@
         {% endif %}
 
         <!-- Recommendations Section -->
-        {% if tv_show_recommendations %}
+        {% if tv_show_detail.recommendations %}
         <div class="mb-16">
-            <h2 class="text-2xl font-bold mb-6 text-white border-l-4 border-red-600 pl-3">Recommended TV Shows</h2>
+            <h2 class="text-2xl font-bold mb-6 text-white border-l-4 border-red-600 pl-3">Recommended Movies</h2>
             <div class="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 scroll-smooth">
-                {% for show in tv_show_recommendations %}
-                <div class="min-w-[200px] w-[200px] md:min-w-[250px] md:w-[250px] transition-transform hover:scale-105 duration-300 relative group cursor-pointer rounded-lg overflow-hidden shadow-lg" onclick="window.location.href='/tv-show/{{show.id}}'">
-                    {% if show.poster_path %}
-                    <img src="https://image.tmdb.org/t/p/w500{{ show.poster_path }}" alt="{{ show.name }}" class="w-full h-full object-cover">
+                {% for movie in tv_show_detail.recommendations %}
+                <div class="min-w-[200px] w-[200px] md:min-w-[250px] md:w-[250px] transition-transform hover:scale-105 duration-300 relative group cursor-pointer rounded-lg overflow-hidden shadow-lg" onclick="window.location.href='/movie/{{movie.id}}'">
+                    {% if movie.poster_path %}
+                    <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}" class="w-full h-full object-cover">
                     {% else %}
                     <div class="w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-gray-500">No Image</div>
                     {% endif %}
                     <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                        <p class="font-bold text-md text-white drop-shadow-md">{{ show.name }}</p>
-                        {% if show.vote_average %}
-                            <p class="text-green-400 text-sm font-medium mt-1"><i class="fa fa-star"></i> {{ "{:.1f}".format(show.vote_average) }}</p>
+                        <p class="font-bold text-md text-white drop-shadow-md">{{ movie.title }}</p>
+                        {% if movie.vote_average %}
+                            <p class="text-green-400 text-sm font-medium mt-1"><i class="fa fa-star"></i> {{ "{:.1f}".format(movie.vote_average) }}</p>
                         {% endif %}
                     </div>
                 </div>
@@ -184,20 +184,20 @@
         </div>
         {% endif %}
 
-        <!-- Similar TV Shows Section -->
-        {% if tv_show_similar %}
+        <!-- Similar Movies Section -->
+        {% if tv_show_detail.similar %}
         <div class="mb-8">
-            <h2 class="text-2xl font-bold mb-6 text-white border-l-4 border-red-600 pl-3">Similar TV Shows</h2>
+            <h2 class="text-2xl font-bold mb-6 text-white border-l-4 border-red-600 pl-3">Similar Movies</h2>
             <div class="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 scroll-smooth">
-                {% for show in tv_show_similar %}
-                <div class="min-w-[200px] w-[200px] md:min-w-[250px] md:w-[250px] transition-transform hover:scale-105 duration-300 relative group cursor-pointer rounded-lg overflow-hidden shadow-lg" onclick="window.location.href='/tv-show/{{show.id}}'">
-                    {% if show.poster_path %}
-                    <img src="https://image.tmdb.org/t/p/w500{{ show.poster_path }}" alt="{{ show.name }}" class="w-full h-full object-cover">
+                {% for movie in tv_show_detail.similar %}
+                <div class="min-w-[200px] w-[200px] md:min-w-[250px] md:w-[250px] transition-transform hover:scale-105 duration-300 relative group cursor-pointer rounded-lg overflow-hidden shadow-lg" onclick="window.location.href='/movie/{{movie.id}}'">
+                    {% if movie.poster_path %}
+                    <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}" class="w-full h-full object-cover">
                     {% else %}
                     <div class="w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-gray-500">No Image</div>
                     {% endif %}
                     <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                        <p class="font-bold text-md text-white drop-shadow-md">{{ show.name }}</p>
+                        <p class="font-bold text-md text-white drop-shadow-md">{{ movie.title }}</p>
                     </div>
                 </div>
                 {% endfor %}
