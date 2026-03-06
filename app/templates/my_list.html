@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Hero Header styling -->
+<div class="relative w-full pt-32 pb-12 bg-[#141414] text-white overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-red-900/20 to-transparent"></div>
+    <div class="container mx-auto px-6 md:px-12 relative z-10 flex items-center justify-between">
+        <div>
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2 drop-shadow-md">My List</h1>
+            <p class="text-gray-400 text-lg">Your saved movies and TV shows.</p>
+        </div>
+        <div class="hidden md:flex items-center text-gray-500">
+            <i class="fa fa-bookmark text-4xl opacity-50"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Grid Content -->
+<div class="bg-[#141414] min-h-[50vh] pb-20">
+    <div class="container mx-auto px-6 md:px-12">
+        {% if items %}
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+            {% for item in items %}
+            <div class="transition-transform hover:scale-105 duration-300 relative group cursor-pointer rounded-lg overflow-hidden shadow-lg border border-gray-800"
+                onclick="window.location.href='/{{ 'movie' if item.media_type == 'movie' else 'tv-show' }}/{{ item.item_id }}'">
+
+                {% if item.poster_path %}
+                <img src="https://image.tmdb.org/t/p/w500{{ item.poster_path }}" alt="{{ item.title }}"
+                    class="w-full aspect-[2/3] object-cover">
+                {% else %}
+                <div
+                    class="w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-gray-500 text-center p-4">
+                    <span>{{ item.title }}</span>
+                </div>
+                {% endif %}
+
+                <!-- Hover Info -->
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                    <p class="font-bold text-sm text-white drop-shadow-md leading-tight">{{ item.title }}</p>
+                    <p class="text-xs text-gray-400 mt-1 capitalize">{{ item.media_type }}</p>
+                </div>
+
+                <!-- Remove Button (Absolute Top Right) -->
+                <form action="{{ url_for('main.toggle_watchlist', media_type=item.media_type, item_id=item.item_id) }}"
+                    method="POST"
+                    class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition duration-300 z-20">
+                    <input type="hidden" name="title" value="{{ item.title }}">
+                    <input type="hidden" name="poster_path" value="{{ item.poster_path or '' }}">
+                    <button type="submit"
+                        class="bg-black/60 hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition border border-gray-600 hover:border-red-500"
+                        title="Remove from My List" onclick="event.stopPropagation();">
+                        <i class="fa fa-times text-sm"></i>
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-20 text-center">
+            <i class="fa fa-plus-circle text-6xl text-gray-600 mb-6"></i>
+            <h2 class="text-2xl font-bold text-gray-300 mb-2">Your list is empty</h2>
+            <p class="text-gray-500 max-w-md mx-auto mb-8">Add movies and TV shows to your list so you can easily find
+                them later.</p>
+            <a href="{{ url_for('main.index') }}"
+                class="bg-white text-black px-8 py-3 rounded font-bold hover:bg-gray-200 transition">
+                Explore Titles
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
