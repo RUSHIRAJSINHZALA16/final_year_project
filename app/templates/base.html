@@ -40,8 +40,8 @@
             <h1 class="text-red-600 font-bold text-3xl cursor-pointer">STREAMIFY</h1>
             <div class="hidden md:flex gap-4 text-sm font-medium text-gray-300">
                 <a href="{{ url_for('main.index') }}" class="hover:text-white transition">Home</a>
-                <a href="#" class="hover:text-white transition">TV Shows</a>
-                <a href="#" class="hover:text-white transition">Movies</a>
+                <a href="/?type=tv-show" class="hover:text-white transition">TV Shows</a>
+                <a href="/?type=movie" class="hover:text-white transition">Movies</a>
                 <a href="{{ url_for('main.my_list') }}" class="hover:text-white transition">My List</a>
             </div>
         </div>

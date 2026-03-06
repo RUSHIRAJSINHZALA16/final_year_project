@@ -1,8 +1,9 @@
+import random
 from typing import List
 
 from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
-from themoviedb import TMDb, Genre, PartialMovie
+from themoviedb import TMDb, Genre, PartialMovie, PartialTV
 
 from ..models import Movie, Rating, WatchlistItem, db
 
@@ -16,22 +17,71 @@ tmdb = TMDb()
 @main.route('/')
 @login_required
 def index():
-    genre_data:dict[str,  list[PartialMovie] | None] = {
-        'Action': tmdb.discover().movie(page=1, with_genres='28').results,
-        'Comedy': tmdb.discover().movie(page=1, with_genres='35').results,
-        'Drama': tmdb.discover().movie(page=1, with_genres='18').results,
-        'Sci-Fi': tmdb.discover().movie(page=1, with_genres='878').results
-    }
+    query = request.args.get('type', '').strip().lower()
 
-    # 2. Pick a "Featured" movie for the Hero/Top Banner
-    # featured = Movie.query.order_by(Movie.tmdb_rating.desc()).first()
-    data_featured = tmdb.movies().top_rated().results
-    if len(data_featured) > 0:
-        featured = data_featured[0]
-    else:
-        featured = None
+    is_movie = False
+    is_tv_show = False
+
+    if not query:
+        is_movie = True
+        is_tv_show = True
+    elif query == 'movie':
+        is_movie = True
+    elif query == 'tv-show':
+        is_tv_show = True
+
+    movie_featured: PartialMovie | None = None
+    tv_show_featured: PartialTV | None = None
+
+    movie_genre_data: dict[str, list[PartialMovie] | None] | None = None
+    tv_show_genre_data: dict[str, list[PartialTV] | None] | None = None
+
+    if is_movie:
+        movie_genre_data = {
+            'Action': tmdb.discover().movie(page=1, with_genres='28').results,
+            'Comedy': tmdb.discover().movie(page=1, with_genres='35').results,
+            'Drama': tmdb.discover().movie(page=1, with_genres='18').results,
+            'Sci-Fi': tmdb.discover().movie(page=1, with_genres='878').results
+        }
+
+        # 2. Pick a "Featured" movie for the Hero/Top Banner
+        # featured = Movie.query.order_by(Movie.tmdb_rating.desc()).first()
+        data_featured = tmdb.movies().top_rated().results
+        if len(data_featured) > 0:
+            movie_featured = data_featured[0]
+
+    if is_tv_show:
+        tv_show_genre_data: dict[str, list[PartialMovie] | None] = {
+            'Action & Adventure': tmdb.discover().tv(page=1, with_genres='10759').results,
+            'Comedy': tmdb.discover().tv(page=1, with_genres='35').results,
+            'Drama': tmdb.discover().tv(page=1, with_genres='18').results,
+            'Sci-Fi & Fantasy': tmdb.discover().tv(page=1, with_genres='10765').results
+        }
+
+        # 2. Pick a "Featured" movie for the Hero/Top Banner
+        # featured = Movie.query.order_by(Movie.tmdb_rating.desc()).first()
+        data_featured1 = tmdb.tvs().top_rated().results
+        if len(data_featured1) > 0:
+            tv_show_featured = data_featured1[0]
+
+    show_featured_movie = True
+    if is_tv_show and is_movie:
+        show_featured_movie = random.uniform(0, 1) > 0.5
+    elif is_tv_show:
+        show_featured_movie = False
+    elif is_movie:
+        show_featured_movie = True
+
     # 3. Render the Netflix-style template
-    return render_template('index.html', genre_data=genre_data, featured=featured)
+    return render_template('index.html',
+                           show_featured_movie=show_featured_movie,
+                           is_movie=is_movie,
+                           is_tv_show=is_tv_show,
+                           movie_genre_data=movie_genre_data,
+                           movie_featured=movie_featured,
+                           tv_show_genre_data=tv_show_genre_data,
+                           tv_show_featured=tv_show_featured
+                           )
 
 
 @main.route('/rate/<int:movie_id>', methods=['POST'])
