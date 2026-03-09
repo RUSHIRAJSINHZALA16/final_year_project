@@ -3,13 +3,17 @@
 
 {% if show_featured_movie %}
     {% if movie_featured %}
-        <div class="relative h-[75vh] w-full bg-cover bg-center" style="background-image: url('https://image.tmdb.org/t/p/original{{ movie_featured.poster_path }}');">
-            <div class="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-black/40 p-20 flex flex-col justify-end">
-                <h1 class="text-7xl font-bold mb-4">{{ movie_featured.title }}</h1>
-                <p class="w-1/3 text-lg text-gray-200 mb-6">{{ movie_featured.overview[:250] }}...</p>
+        <div class="relative h-[75vh] w-full bg-cover bg-center" style="background-image: url('https://image.tmdb.org/t/p/original{{ movie_featured.backdrop_path or movie_featured.poster_path }}');">
+            <!-- Gradients to blend into background -->
+            <div class="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/50 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#141414]/90 via-[#141414]/40 to-transparent"></div>
+            
+            <div class="absolute inset-0 flex flex-col justify-center px-12 pt-32 pb-24 w-full lg:w-2/3">
+                <h1 class="text-6xl md:text-7xl font-bold mb-4 drop-shadow-lg text-white">{{ movie_featured.title }}</h1>
+                <p class="w-full md:w-3/4 text-lg text-gray-200 mb-8 drop-shadow-md line-clamp-3">{{ movie_featured.overview }}</p>
                 <div class="flex gap-4">
-                    <button class="bg-white text-black px-10 py-3 rounded font-bold hover:bg-gray-200"><i class="fa fa-play mr-2"></i> Play</button>
-                    <button class="bg-gray-500/50 text-white px-10 py-3 rounded font-bold hover:bg-gray-400">More Info</button>
+                    <button class="bg-white text-black px-8 py-3 rounded md:text-lg font-bold hover:bg-gray-200 transition flex items-center justify-center gap-2" onclick="window.location.href='/movie/{{movie_featured.id}}'"><i class="fa fa-play"></i> Play</button>
+                    <button class="bg-gray-500/50 text-white px-8 py-3 rounded md:text-lg font-bold hover:bg-gray-500 transition flex items-center justify-center gap-2" onclick="window.location.href='/movie/{{movie_featured.id}}'"><i class="fa fa-info-circle"></i> More Info</button>
                 </div>
             </div>
         </div>
@@ -24,13 +28,17 @@
 
 {% else %}
     {% if tv_show_featured %}
-        <div class="relative h-[75vh] w-full bg-cover bg-center" style="background-image: url('https://image.tmdb.org/t/p/original{{ tv_show_featured.poster_path }}');">
-            <div class="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-black/40 p-20 flex flex-col justify-end">
-                <h1 class="text-7xl font-bold mb-4">{{ tv_show_featured.name }}</h1>
-                <p class="w-1/3 text-lg text-gray-200 mb-6">{{ tv_show_featured.overview[:250] }}...</p>
+        <div class="relative h-[75vh] w-full bg-cover bg-center" style="background-image: url('https://image.tmdb.org/t/p/original{{ tv_show_featured.backdrop_path or tv_show_featured.poster_path }}');">
+            <!-- Gradients to blend into background -->
+            <div class="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/50 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#141414]/90 via-[#141414]/40 to-transparent"></div>
+            
+            <div class="absolute inset-0 flex flex-col justify-center px-12 pt-32 pb-24 w-full lg:w-2/3">
+                <h1 class="text-6xl md:text-7xl font-bold mb-4 drop-shadow-lg text-white">{{ tv_show_featured.name }}</h1>
+                <p class="w-full md:w-3/4 text-lg text-gray-200 mb-8 drop-shadow-md line-clamp-3">{{ tv_show_featured.overview }}</p>
                 <div class="flex gap-4">
-                    <button class="bg-white text-black px-10 py-3 rounded font-bold hover:bg-gray-200"><i class="fa fa-play mr-2"></i> Play</button>
-                    <button class="bg-gray-500/50 text-white px-10 py-3 rounded font-bold hover:bg-gray-400">More Info</button>
+                    <button class="bg-white text-black px-8 py-3 rounded md:text-lg font-bold hover:bg-gray-200 transition flex items-center justify-center gap-2" onclick="window.location.href='/movie/{{tv_show_featured.id}}'"><i class="fa fa-play"></i> Play</button>
+                    <button class="bg-gray-500/50 text-white px-8 py-3 rounded md:text-lg font-bold hover:bg-gray-500 transition flex items-center justify-center gap-2" onclick="window.location.href='/movie/{{tv_show_featured.id}}'"><i class="fa fa-info-circle"></i> More Info</button>
                 </div>
             </div>
         </div>
@@ -47,13 +55,22 @@
 {% if is_movie %}
 
     {% if is_tv_show %}
-    <h3>Movies</h3>
+    <h3 class="px-12 pt-8 text-3xl font-bold text-white">Movies</h3>
     {% endif %}
 
     {% for genre, movies in movie_genre_data.items() %}
-    <div class="px-12 py-8">
+    <div class="px-12 py-8 relative group/slider">
         <h2 class="text-2xl font-semibold mb-4 text-gray-400">{{ genre }}</h2>
-        <div class="flex gap-4 overflow-x-auto no-scrollbar">
+        
+        <!-- Scroll Buttons -->
+        <button class="absolute left-0 top-0 bottom-0 z-40 w-12 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 hover:bg-black/80 hover:text-white mt-12" onclick="document.getElementById('slider-movie-{{ loop.index }}').scrollBy({left: -800, behavior: 'smooth'})">
+            <i class="fa fa-chevron-left text-3xl"></i>
+        </button>
+        <button class="absolute right-0 top-0 bottom-0 z-40 w-12 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 hover:bg-black/80 hover:text-white mt-12" onclick="document.getElementById('slider-movie-{{ loop.index }}').scrollBy({left: 800, behavior: 'smooth'})">
+            <i class="fa fa-chevron-right text-3xl"></i>
+        </button>
+
+        <div id="slider-movie-{{ loop.index }}" class="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth">
             {% for movie in movies %}
             <div class="min-w-[250px] transition-transform hover:scale-110 duration-300 relative group cursor-pointer">
                 <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" class="rounded shadow-xl">
@@ -90,13 +107,22 @@
 {% if is_tv_show %}
 
     {% if is_movie %}
-    <h3>TV Shows</h3>
+    <h3 class="px-12 pt-8 text-3xl font-bold text-white">TV Shows</h3>
     {% endif %}
 
     {% for genre, movies in tv_show_genre_data.items() %}
-    <div class="px-12 py-8">
+    <div class="px-12 py-8 relative group/slider">
         <h2 class="text-2xl font-semibold mb-4 text-gray-400">{{ genre }}</h2>
-        <div class="flex gap-4 overflow-x-auto no-scrollbar">
+        
+        <!-- Scroll Buttons -->
+        <button class="absolute left-0 top-0 bottom-0 z-40 w-12 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 hover:bg-black/80 hover:text-white mt-12" onclick="document.getElementById('slider-tv-{{ loop.index }}').scrollBy({left: -800, behavior: 'smooth'})">
+            <i class="fa fa-chevron-left text-3xl"></i>
+        </button>
+        <button class="absolute right-0 top-0 bottom-0 z-40 w-12 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 hover:bg-black/80 hover:text-white mt-12" onclick="document.getElementById('slider-tv-{{ loop.index }}').scrollBy({left: 800, behavior: 'smooth'})">
+            <i class="fa fa-chevron-right text-3xl"></i>
+        </button>
+
+        <div id="slider-tv-{{ loop.index }}" class="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth">
             {% for movie in movies %}
             <div class="min-w-[250px] transition-transform hover:scale-110 duration-300 relative group cursor-pointer">
                 <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" class="rounded shadow-xl">

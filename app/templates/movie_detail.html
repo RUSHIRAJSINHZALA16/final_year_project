@@ -6,9 +6,10 @@
     <!-- Backdrop Image with Gradient Overlays -->
     <div class="absolute inset-0 w-full h-full">
         {% if movie_detail.backdrop_path %}
-            <img src="https://image.tmdb.org/t/p/original{{ movie_detail.backdrop_path }}" alt="{{ movie_detail.title }}" class="w-full h-full object-cover object-top opacity-50">
+        <img src="https://image.tmdb.org/t/p/original{{ movie_detail.backdrop_path }}" alt="{{ movie_detail.title }}"
+            class="w-full h-full object-cover object-top opacity-50">
         {% else %}
-            <div class="w-full h-full bg-gray-900"></div>
+        <div class="w-full h-full bg-gray-900"></div>
         {% endif %}
         <!-- Gradients to blend into background -->
         <div class="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/60 to-transparent"></div>
@@ -16,14 +17,39 @@
     </div>
 
     <!-- Content Container -->
-    <div class="relative z-10 container mx-auto px-6 md:px-12 pt-32 pb-16 flex flex-col md:flex-row gap-12 items-center md:items-start h-full">
-        
+    <div
+        class="relative z-10 container mx-auto px-6 md:px-12 pt-32 pb-16 flex flex-col md:flex-row gap-12 items-center md:items-start h-full">
+
         <!-- Poster Thumbnail -->
-        <div class="w-64 md:w-80 flex-shrink-0">
+        <div class="w-64 md:w-80 flex-shrink-0 relative group/poster">
+            {% set trailer = namespace(found=false, vid=None) %}
+            {% for vid in movie_detail.videos %}
+            {% if vid.site == 'YouTube' and vid.type == 'Trailer' and not trailer.found %}
+            {% set trailer.found = true %}
+            {% set trailer.vid = vid %}
+            {% endif %}
+            {% endfor %}
+
+            {% if not trailer.found and movie_detail.videos %}
+            {% set trailer.vid = movie_detail.videos[0] %}
+            {% endif %}
+
             {% if movie_detail.poster_path %}
-                <img src="https://image.tmdb.org/t/p/w500{{ movie_detail.poster_path }}" alt="{{ movie_detail.title }} Poster" class="rounded-xl shadow-2xl border border-gray-700 w-full hover:scale-105 transition duration-300">
+            <img src="https://image.tmdb.org/t/p/w500{{ movie_detail.poster_path }}"
+                alt="{{ movie_detail.title }} Poster"
+                class="rounded-xl shadow-2xl border border-gray-700 w-full transition duration-300 {% if trailer.vid %}group-hover/poster:brightness-50{% endif %}">
             {% else %}
-                <div class="w-full aspect-[2/3] bg-gray-800 rounded-xl flex items-center justify-center text-gray-500 border border-gray-700">No Poster</div>
+            <div
+                class="w-full aspect-[2/3] bg-gray-800 rounded-xl flex items-center justify-center text-gray-500 border border-gray-700">
+                No Poster</div>
+            {% endif %}
+
+            {% if trailer.vid %}
+            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover/poster:opacity-100 transition-opacity duration-300 z-20 cursor-pointer" onclick="document.getElementById('trailer-modal').classList.remove('hidden')">
+                <div class="bg-red-600/90 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg transform group-hover/poster:scale-110 transition duration-300">
+                    <i class="fa fa-play text-2xl ml-1"></i>
+                </div>
+            </div>
             {% endif %}
         </div>
 
@@ -32,34 +58,37 @@
             <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight mb-2 drop-shadow-md">
                 {{ movie_detail.title }}
                 {% if movie_detail.release_date %}
-                    <span class="text-3xl font-light text-gray-300">({{ movie_detail.release_date.year }})</span>
+                <span class="text-3xl font-light text-gray-300">({{ movie_detail.release_date.year }})</span>
                 {% endif %}
             </h1>
-            
+
             {% if movie_detail.tagline %}
-                <p class="text-xl text-gray-400 italic mb-6">"{{ movie_detail.tagline }}"</p>
+            <p class="text-xl text-gray-400 italic mb-6">"{{ movie_detail.tagline }}"</p>
             {% else %}
-                <div class="mb-6"></div>
+            <div class="mb-6"></div>
             {% endif %}
 
             <!-- Quick Snaps: Metadata -->
             <div class="flex flex-wrap items-center gap-4 text-sm font-medium text-gray-300 mb-8">
                 {% if movie_detail.vote_average %}
-                    <span class="flex items-center gap-1 bg-green-600/20 text-green-400 px-2 py-1 rounded border border-green-600/30">
-                        <i class="fa fa-star"></i> {{ "{:.1f}".format(movie_detail.vote_average) }} Rating
-                    </span>
+                <span
+                    class="flex items-center gap-1 bg-green-600/20 text-green-400 px-2 py-1 rounded border border-green-600/30">
+                    <i class="fa fa-star"></i> {{ "{:.1f}".format(movie_detail.vote_average) }} Rating
+                </span>
                 {% endif %}
                 {% if movie_detail.runtime %}
-                    <span class="flex items-center gap-1">
-                        <i class="fa fa-clock"></i> {{ movie_detail.runtime // 60 }}h {{ movie_detail.runtime % 60 }}m
-                    </span>
+                <span class="flex items-center gap-1">
+                    <i class="fa fa-clock"></i> {{ movie_detail.runtime // 60 }}h {{ movie_detail.runtime % 60 }}m
+                </span>
                 {% endif %}
                 {% if movie_detail.genres %}
-                    <span class="flex items-center gap-2">
-                        {% for genre in movie_detail.genres %}
-                            <span class="bg-gray-800 px-3 py-1 rounded-full text-xs hover:bg-gray-700 transition cursor-default">{{ genre.name }}</span>
-                        {% endfor %}
-                    </span>
+                <span class="flex items-center gap-2">
+                    {% for genre in movie_detail.genres %}
+                    <span
+                        class="bg-gray-800 px-3 py-1 rounded-full text-xs hover:bg-gray-700 transition cursor-default">{{
+                        genre.name }}</span>
+                    {% endfor %}
+                </span>
                 {% endif %}
             </div>
 
@@ -71,14 +100,16 @@
 
             <!-- Actions -->
             <div class="flex items-center gap-4 mb-8">
-                <form action="{{ url_for('main.toggle_watchlist', media_type='movie', item_id=movie_detail.id) }}" method="POST">
+                <form action="{{ url_for('main.toggle_watchlist', media_type='movie', item_id=movie_detail.id) }}"
+                    method="POST">
                     <input type="hidden" name="title" value="{{ movie_detail.title }}">
                     <input type="hidden" name="poster_path" value="{{ movie_detail.poster_path or '' }}">
-                    <button type="submit" class="flex items-center gap-2 px-6 py-2.5 rounded font-bold transition duration-300 {% if in_watchlist %}bg-gray-600/50 hover:bg-gray-500/50 text-white{% else %}bg-transparent border-2 border-white text-white hover:bg-white hover:text-black{% endif %}">
+                    <button type="submit"
+                        class="flex items-center gap-2 px-6 py-2.5 rounded font-bold transition duration-300 {% if in_watchlist %}bg-gray-600/50 hover:bg-gray-500/50 text-white{% else %}bg-transparent border-2 border-white text-white hover:bg-white hover:text-black{% endif %}">
                         {% if in_watchlist %}
-                            <i class="fa fa-check text-lg"></i> In My List
+                        <i class="fa fa-check text-lg"></i> In My List
                         {% else %}
-                            <i class="fa fa-plus text-lg"></i> Add to My List
+                        <i class="fa fa-plus text-lg"></i> Add to My List
                         {% endif %}
                     </button>
                 </form>
@@ -105,54 +136,68 @@
                 </div>
                 {% endif %}
             </div>
-            
+
         </div>
     </div>
 </div>
 
 <div class="bg-[#141414] pb-20">
     <div class="container mx-auto px-6 md:px-12">
-        {% set trailer = namespace(found=false, vid=None) %}
-        {% for vid in movie_detail.videos %}
-            {% if vid.site == 'YouTube' and vid.type == 'Trailer' and not trailer.found %}
-                {% set trailer.found = true %}
-                {% set trailer.vid = vid %}
-            {% endif %}
-        {% endfor %}
-        
-        {% if not trailer.found and movie_detail.videos %}
-            {% set trailer.vid = movie_detail.videos[0] %}
-        {% endif %}
-
         {% if trailer.vid %}
-        <!-- Trailer Section -->
-        <div class="mt-8 mb-16">
-            <h2 class="text-2xl font-bold mb-6 text-white border-l-4 border-red-600 pl-3">Official Trailer</h2>
-            <div class="aspect-video w-full max-w-5xl mx-auto rounded-xl overflow-hidden shadow-2xl border border-gray-800 bg-black">
-                <iframe class="w-full h-full" src="https://www.youtube.com/embed/{{ trailer.vid.key }}?rel=0&showinfo=0&autoplay=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <!-- Trailer Modal -->
+        <div id="trailer-modal"
+            class="fixed inset-0 z-[100] bg-black/90 hidden flex flex-col items-center justify-center p-4 backdrop-blur-sm">
+            <button
+                onclick="document.getElementById('trailer-modal').classList.add('hidden'); document.getElementById('trailer-iframe').src = document.getElementById('trailer-iframe').src"
+                class="absolute top-6 right-6 text-white hover:text-gray-400 transition">
+                <i class="fa fa-times text-4xl"></i>
+            </button>
+            <div class="w-full max-w-5xl aspect-video bg-black rounded-lg overflow-hidden shadow-2xl relative">
+                <iframe id="trailer-iframe" class="absolute inset-0 w-full h-full"
+                    src="https://www.youtube.com/embed/{{ trailer.vid.key }}?rel=0&showinfo=0&autoplay=0"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
             </div>
         </div>
         {% endif %}
 
         <!-- Top Cast Section (Casting Proper List) -->
         {% if movie_detail.credits and movie_detail.credits.cast %}
-        <div class="mb-16">
+        <div class="mb-16 relative group/slider">
             <h2 class="text-2xl font-bold mb-6 text-white border-l-4 border-red-600 pl-3">Top Cast</h2>
-            <div class="flex gap-6 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 scroll-smooth">
+
+            <!-- Scroll Buttons -->
+            <button
+                class="absolute left-0 top-12 bottom-0 z-40 w-12 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 hover:bg-black/80 hover:text-white"
+                onclick="document.getElementById('slider-cast').scrollBy({left: -800, behavior: 'smooth'})">
+                <i class="fa fa-chevron-left text-3xl"></i>
+            </button>
+            <button
+                class="absolute right-0 top-12 bottom-0 z-40 w-12 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 hover:bg-black/80 hover:text-white"
+                onclick="document.getElementById('slider-cast').scrollBy({left: 800, behavior: 'smooth'})">
+                <i class="fa fa-chevron-right text-3xl"></i>
+            </button>
+
+            <div id="slider-cast" class="flex gap-6 overflow-x-auto no-scrollbar pb-4 px-4 scroll-smooth">
                 {% for actor in movie_detail.credits.cast[:15] %}
-                <div class="min-w-[140px] w-[140px] flex-shrink-0 bg-gray-900 rounded-lg overflow-hidden shadow-lg border border-gray-800 hover:border-gray-600 transition duration-300 group">
+                <div
+                    class="min-w-[140px] w-[140px] flex-shrink-0 bg-gray-900 rounded-lg overflow-hidden shadow-lg border border-gray-800 hover:border-gray-600 transition duration-300 group">
                     <div class="h-[210px] bg-gray-800 overflow-hidden">
                         {% if actor.profile_path %}
-                            <img src="https://image.tmdb.org/t/p/w276_and_h350_face{{ actor.profile_path }}" alt="{{ actor.name }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <img src="https://image.tmdb.org/t/p/w276_and_h350_face{{ actor.profile_path }}"
+                            alt="{{ actor.name }}"
+                            class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
                         {% else %}
-                            <div class="w-full h-full flex items-center justify-center text-gray-600">
-                                <i class="fa fa-user text-4xl"></i>
-                            </div>
+                        <div class="w-full h-full flex items-center justify-center text-gray-600">
+                            <i class="fa fa-user text-4xl"></i>
+                        </div>
                         {% endif %}
                     </div>
                     <div class="p-3">
                         <p class="font-bold text-sm text-white truncate" title="{{ actor.name }}">{{ actor.name }}</p>
-                        <p class="text-xs text-gray-400 mt-1 line-clamp-2" title="{{ actor.character }}">{{ actor.character }}</p>
+                        <p class="text-xs text-gray-400 mt-1 line-clamp-2" title="{{ actor.character }}">{{
+                            actor.character }}</p>
                     </div>
                 </div>
                 {% endfor %}
@@ -162,20 +207,38 @@
 
         <!-- Recommendations Section -->
         {% if movie_detail.recommendations %}
-        <div class="mb-16">
+        <div class="mb-16 relative group/slider">
             <h2 class="text-2xl font-bold mb-6 text-white border-l-4 border-red-600 pl-3">Recommended Movies</h2>
-            <div class="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 scroll-smooth">
+
+            <!-- Scroll Buttons -->
+            <button
+                class="absolute left-0 top-12 bottom-0 z-40 w-12 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 hover:bg-black/80 hover:text-white"
+                onclick="document.getElementById('slider-recs').scrollBy({left: -800, behavior: 'smooth'})">
+                <i class="fa fa-chevron-left text-3xl"></i>
+            </button>
+            <button
+                class="absolute right-0 top-12 bottom-0 z-40 w-12 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 hover:bg-black/80 hover:text-white"
+                onclick="document.getElementById('slider-recs').scrollBy({left: 800, behavior: 'smooth'})">
+                <i class="fa fa-chevron-right text-3xl"></i>
+            </button>
+
+            <div id="slider-recs" class="flex gap-4 overflow-x-auto no-scrollbar pb-4 px-4 scroll-smooth">
                 {% for movie in movie_detail.recommendations %}
-                <div class="min-w-[200px] w-[200px] md:min-w-[250px] md:w-[250px] transition-transform hover:scale-105 duration-300 relative group cursor-pointer rounded-lg overflow-hidden shadow-lg" onclick="window.location.href='/movie/{{movie.id}}'">
+                <div class="min-w-[200px] w-[200px] md:min-w-[250px] md:w-[250px] transition-transform hover:scale-105 duration-300 relative group cursor-pointer rounded-lg overflow-hidden shadow-lg"
+                    onclick="window.location.href='/movie/{{movie.id}}'">
                     {% if movie.poster_path %}
-                    <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}" class="w-full h-full object-cover">
+                    <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}"
+                        class="w-full h-full object-cover">
                     {% else %}
-                    <div class="w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-gray-500">No Image</div>
+                    <div class="w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-gray-500">No Image
+                    </div>
                     {% endif %}
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
                         <p class="font-bold text-md text-white drop-shadow-md">{{ movie.title }}</p>
                         {% if movie.vote_average %}
-                            <p class="text-green-400 text-sm font-medium mt-1"><i class="fa fa-star"></i> {{ "{:.1f}".format(movie.vote_average) }}</p>
+                        <p class="text-green-400 text-sm font-medium mt-1"><i class="fa fa-star"></i> {{
+                            "{:.1f}".format(movie.vote_average) }}</p>
                         {% endif %}
                     </div>
                 </div>
@@ -186,17 +249,34 @@
 
         <!-- Similar Movies Section -->
         {% if movie_detail.similar %}
-        <div class="mb-8">
+        <div class="mb-8 relative group/slider">
             <h2 class="text-2xl font-bold mb-6 text-white border-l-4 border-red-600 pl-3">Similar Movies</h2>
-            <div class="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 scroll-smooth">
+
+            <!-- Scroll Buttons -->
+            <button
+                class="absolute left-0 top-12 bottom-0 z-40 w-12 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 hover:bg-black/80 hover:text-white"
+                onclick="document.getElementById('slider-sim').scrollBy({left: -800, behavior: 'smooth'})">
+                <i class="fa fa-chevron-left text-3xl"></i>
+            </button>
+            <button
+                class="absolute right-0 top-12 bottom-0 z-40 w-12 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 hover:bg-black/80 hover:text-white"
+                onclick="document.getElementById('slider-sim').scrollBy({left: 800, behavior: 'smooth'})">
+                <i class="fa fa-chevron-right text-3xl"></i>
+            </button>
+
+            <div id="slider-sim" class="flex gap-4 overflow-x-auto no-scrollbar pb-4 px-4 scroll-smooth">
                 {% for movie in movie_detail.similar %}
-                <div class="min-w-[200px] w-[200px] md:min-w-[250px] md:w-[250px] transition-transform hover:scale-105 duration-300 relative group cursor-pointer rounded-lg overflow-hidden shadow-lg" onclick="window.location.href='/movie/{{movie.id}}'">
+                <div class="min-w-[200px] w-[200px] md:min-w-[250px] md:w-[250px] transition-transform hover:scale-105 duration-300 relative group cursor-pointer rounded-lg overflow-hidden shadow-lg"
+                    onclick="window.location.href='/movie/{{movie.id}}'">
                     {% if movie.poster_path %}
-                    <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}" class="w-full h-full object-cover">
+                    <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}"
+                        class="w-full h-full object-cover">
                     {% else %}
-                    <div class="w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-gray-500">No Image</div>
+                    <div class="w-full aspect-[2/3] bg-gray-800 flex items-center justify-center text-gray-500">No Image
+                    </div>
                     {% endif %}
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
                         <p class="font-bold text-md text-white drop-shadow-md">{{ movie.title }}</p>
                     </div>
                 </div>
