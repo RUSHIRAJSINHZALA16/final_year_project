@@ -37,8 +37,8 @@
                 <h1 class="text-6xl md:text-7xl font-bold mb-4 drop-shadow-lg text-white">{{ tv_show_featured.name }}</h1>
                 <p class="w-full md:w-3/4 text-lg text-gray-200 mb-8 drop-shadow-md line-clamp-3">{{ tv_show_featured.overview }}</p>
                 <div class="flex gap-4">
-                    <button class="bg-white text-black px-8 py-3 rounded md:text-lg font-bold hover:bg-gray-200 transition flex items-center justify-center gap-2" onclick="window.location.href='/movie/{{tv_show_featured.id}}'"><i class="fa fa-play"></i> Play</button>
-                    <button class="bg-gray-500/50 text-white px-8 py-3 rounded md:text-lg font-bold hover:bg-gray-500 transition flex items-center justify-center gap-2" onclick="window.location.href='/movie/{{tv_show_featured.id}}'"><i class="fa fa-info-circle"></i> More Info</button>
+                    <button class="bg-white text-black px-8 py-3 rounded md:text-lg font-bold hover:bg-gray-200 transition flex items-center justify-center gap-2" onclick="window.location.href='/tv-show/{{tv_show_featured.id}}'"><i class="fa fa-play"></i> Play</button>
+                    <button class="bg-gray-500/50 text-white px-8 py-3 rounded md:text-lg font-bold hover:bg-gray-500 transition flex items-center justify-center gap-2" onclick="window.location.href='/tv-show/{{tv_show_featured.id}}'"><i class="fa fa-info-circle"></i> More Info</button>
                 </div>
             </div>
         </div>
@@ -126,7 +126,7 @@
             {% for movie in movies %}
             <div class="min-w-[250px] transition-transform hover:scale-110 duration-300 relative group cursor-pointer">
                 <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" class="rounded shadow-xl">
-                <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-center text-center" onclick="window.location.href='/movie/{{movie.id}}'">
+                <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-center text-center" onclick="window.location.href='/tv-show/{{movie.id}}'">
                     <p class="font-bold text-sm mb-2">{{ movie.title }}</p>
     <!--                <form action="/rate/{{ movie.id }}" method="POST" class="flex flex-col items-center mt-2 star-rating-form" onclick="event.stopPropagation()">-->
     <!--                    <div class="flex flex-row-reverse justify-center items-center gap-1 group star-rating">-->
